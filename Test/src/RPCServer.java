@@ -11,6 +11,6 @@ public class RPCServer {
 		KVStore stub = (KVStore) UnicastRemoteObject.exportObject(store, port);
 		
 		Registry registry = LocateRegistry.getRegistry();
-		registry.bind("KVStore", stub);
+		registry.bind(KVStore.nameRes, stub);
 	}
 }
