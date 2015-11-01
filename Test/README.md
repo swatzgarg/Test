@@ -1,4 +1,4 @@
-Compile the Server , Client and Interface
+Compile the Server , Client and KVStore
 >javac Server.java Client.java KVInterface.java
 
 Use rmic to create the stub and skeleton class files.
