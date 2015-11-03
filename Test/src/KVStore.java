@@ -1,10 +1,11 @@
 import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 public interface KVStore extends Remote {
 	
 	public static final String nameRes = "KVStore";
 	
-	public void Put(String key, String value);
-	public String Delete(String key);
-	public String Get(String key);
+	public String put(String key, String value) throws RemoteException;
+	public String delete(String key) throws RemoteException;
+	public String get(String key) throws RemoteException;
 }
