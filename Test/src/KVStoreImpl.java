@@ -5,8 +5,7 @@ public class KVStoreImpl implements KVStore{
 	
 	@Override
 	public void Put(String key, String value) {
-		data.put(key, value);
-		
+		data.put(key, value);	
 	}
 
 	@Override
