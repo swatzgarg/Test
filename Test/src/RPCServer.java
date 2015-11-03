@@ -14,11 +14,9 @@ public class RPCServer {
 	 * @throws MalformedURLException 
 	 * @throws AlreadyBoundException 
 	 */
-	
 	public void start(int port) throws RemoteException, MalformedURLException, AlreadyBoundException {
-		//System.setSecurityManager(new RMISecurityManager());
-		KVStore store = new KVStoreImpl();											//Creates object of type KVStore
-		KVStore stub = (KVStore) UnicastRemoteObject.exportObject(store,port);//Creates stub of type KVStore and exports it on specified port
+		KVStore store = new KVStoreImpl();									  // Creates object of type KVStore
+		KVStore stub = (KVStore) UnicastRemoteObject.exportObject(store,port);// Creates stub of type KVStore and exports it on specified port
 		Registry registry = LocateRegistry.getRegistry();
 		registry.bind(KVStore.nameRes, stub);	
 	}
@@ -30,7 +28,7 @@ public class RPCServer {
 		}
 		
 		int port = Integer.parseInt(args[0]);
-		RPCServer s = new RPCServer();
-		s.start(port);
+		RPCServer server = new RPCServer();
+		server.start(port);
 	}
 }
