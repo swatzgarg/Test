@@ -1,5 +1,9 @@
 import java.util.concurrent.ConcurrentHashMap;
 
+/*
+ * Simple in-memory Key Value store
+ * The functions are synchronized to enable multithreaded access.
+ */
 public class KVStoreImpl implements KVStore{
 	ConcurrentHashMap<String, String> data = new ConcurrentHashMap<String, String>();
 	
@@ -14,8 +18,7 @@ public class KVStoreImpl implements KVStore{
 			data.remove(key);
 		} else {
 			throw new KeyNotFoundException();
-		}
-				
+		}				
 	}
 
 	@Override

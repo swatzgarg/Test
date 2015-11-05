@@ -1,6 +1,9 @@
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+/*
+ * Interface of a simple Key Value Store. Null values are not allowed.
+ */
 public interface KVStore extends Remote {	
 	public static final String nameRes = "KVStore";
 	
