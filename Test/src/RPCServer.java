@@ -13,8 +13,8 @@ public class RPCServer {
 	private final String logFileName="server.log";
 
 	{
-		// enable server side transport level logging
-		System.setProperty("java.rmi.server.logCalls","true");
+		// enable server side transport level logging. Does not output to screen (false)
+		System.setProperty("java.rmi.server.logCalls","false");
 	}
 	
 	/**

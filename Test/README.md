@@ -1,10 +1,8 @@
-Compile the Server , Client and KVStore
->javac RPCServer.java RPCClient.java KVStore.java KVStoreImpl.java KeyNotFoundException.java
+Compile the Server , Client and KVStore  ##This will create jar of client and server separately
+> make
 
-To run server:
- >java -Djava.rmi.server.hostname=<IPAddress> RPCServer 9999
+To run client from src folder
+> java -cp ../bin/RPCClient.jar RPCClient localhost
 
-To run the client :
- >java RPCClient <IPAddress>
-
- <IPAddress> is the IP address of the server machine.
+To run server from src folder
+> java -cp ../bin/RPCServer.jar -Djava.rmi.server.hostname=localhost RPCServer 9999

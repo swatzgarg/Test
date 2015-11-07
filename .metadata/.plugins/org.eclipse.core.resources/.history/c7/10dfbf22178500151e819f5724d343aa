@@ -26,7 +26,7 @@ public class KVStoreImpl implements KVStore{
 
 	@Override
 	public synchronized String get(String key) throws KeyNotFoundException {
-		if(data.containsKey(key)){
+		if(data.containsKey(key)) {
 			return data.get(key);
 		} else {
 			throw new KeyNotFoundException();

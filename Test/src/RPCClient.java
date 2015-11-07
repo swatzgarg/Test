@@ -23,7 +23,7 @@ public class RPCClient {
 	/*
 	 * A simple console UI
 	 */
-	private void ConsoleUI(){
+	private void consoleUI(){
 		Scanner reader = new Scanner(System.in);  // Reading from System.in
 		String ans;
 		String instruction;
@@ -36,7 +36,6 @@ public class RPCClient {
 			instruction = reader.nextLine();
 			
 			if(instruction.toUpperCase().equals("PUT")) {
-				ans = "Instruction failed";
 				System.out.println("Please enter the key ");
 				key = reader.nextLine();
 				System.out.println("Please enter the value ");
@@ -46,7 +45,7 @@ public class RPCClient {
 				}
 				catch(RemoteException e) {
 					System.out.println("Error happened");
-					log.log(Level.SEVERE, "Error Happened", e);
+					log.log(Level.SEVERE, "PUT instruction failed : Key : " + key + "  Value: " + value, e);
 				}
 			}
 			else if(instruction.toUpperCase().equals("GET")) {
@@ -58,11 +57,11 @@ public class RPCClient {
 				}
 				catch (KeyNotFoundException e) {
 					System.out.println("Key not found");
-					log.log(Level.SEVERE, "Key not found", e);
+					log.log(Level.INFO, "GET instruction failed : Key = " + key + " not found");
 				}
 				catch(RemoteException e) {
 					System.out.println("Error happened");
-					log.log(Level.SEVERE, "Error Happened", e);
+					log.log(Level.SEVERE, "GET instruction failed : Key : " + key, e);
 				}
 			}
 			else if(instruction.toUpperCase().equals("DELETE")){
@@ -73,11 +72,11 @@ public class RPCClient {
 				}
 				catch (KeyNotFoundException e) {
 					System.out.println("Key not found");
-					log.log(Level.SEVERE, "Key not found", e);
+					log.log(Level.INFO, "DELETE instruction failed : Key = " + key + " not found");
 				}
 				catch(RemoteException e) {
 					System.out.println("Error happened");
-					log.log(Level.SEVERE, "Error Happened", e);
+					log.log(Level.SEVERE, "DELETE instruction failed : Key : " + key, e);
 				}
 			}
 			else if(instruction.toUpperCase().equals("EXIT")){
@@ -106,12 +105,12 @@ public class RPCClient {
 	
 		log = Logger.getLogger("client");
 		log.setUseParentHandlers(false);		
-		FileHandler handler = new FileHandler(logFileName, false);
+		FileHandler handler = new FileHandler(logFileName, true); //append to log
 		SimpleFormatter formatter = new SimpleFormatter();
 		handler.setFormatter(formatter);
 		log.addHandler(handler);
 		
-		ConsoleUI();
+		consoleUI();
 	}
 	
 	/*
