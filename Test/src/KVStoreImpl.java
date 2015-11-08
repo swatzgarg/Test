@@ -7,9 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class KVStoreImpl implements KVStore{
 	ConcurrentHashMap<String, String> data = new ConcurrentHashMap<String, String>();
 	
-	/**
-	 * put function overwrites duplicate entries and returns most recent value put
-	 */
 	@Override
 	public void put(String key, String value) {
 		data.put(key, value);
