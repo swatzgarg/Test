@@ -17,6 +17,7 @@ public class RPCServer {
 		System.setProperty("java.rmi.server.logCalls","false");
 	}
 	
+	
 	/**
 	 * Starts the server
 	 * @param port
@@ -25,11 +26,12 @@ public class RPCServer {
 	 * @throws FileNotFoundException 
 	 */
 	public void start(int port) throws RemoteException, MalformedURLException, AlreadyBoundException, FileNotFoundException {
+		TPCCoordinator coordinator = new TPCCoordinator(); 
 		
 		TwoPhaseCommitImpl peer = new TwoPhaseCommitImpl();
 		TwoPhaseCommit stub1 = (TwoPhaseCommit) UnicastRemoteObject.exportObject(peer,port);
 		
-		KVStore store = new KVStoreImpl(peer);									  // Creates object of type KVStore
+		KVStore store = new KVStoreImpl(coordinator,peer);									  // Creates object of type KVStore
 		KVStore stub = (KVStore) UnicastRemoteObject.exportObject(store,port);// Creates stub of type KVStore and exports it on specified port
 		
 		Registry registry;
@@ -42,6 +44,8 @@ public class RPCServer {
 		}
 		registry.rebind(KVStore.nameRes, stub);
 		registry.rebind(TwoPhaseCommit.nameRes,stub1);
+		
+		
 		
 		// set the log file to log the calls made to the RPC server
 		FileOutputStream logFile = new FileOutputStream(logFileName);
