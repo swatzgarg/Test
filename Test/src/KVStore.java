@@ -10,4 +10,7 @@ public interface KVStore extends Remote {
 	public void put(String key, String value) throws RemoteException;
 	public void delete(String key) throws RemoteException, KeyNotFoundException;
 	public String get(String key) throws RemoteException, KeyNotFoundException;
+	public String receiveVoteRequest() throws RemoteException, KeyNotFoundException;
+	public void go(String instruction,String key,String value) throws RemoteException, KeyNotFoundException;
+	public void abort() throws RemoteException, KeyNotFoundException;
 }

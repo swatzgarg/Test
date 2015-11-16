@@ -3,6 +3,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -101,7 +102,7 @@ public class RPCClient {
 		Registry registry = LocateRegistry.getRegistry(hostname);
 		store = (KVStore) registry.lookup(KVStore.nameRes);
 		
-		prePopulateValues();
+		//prePopulateValues();
 	
 		log = Logger.getLogger("client");
 		log.setUseParentHandlers(false);		
@@ -140,14 +141,21 @@ public class RPCClient {
 	}
 
 	public static void main(String args[]) throws NotBoundException, SecurityException, IOException, KeyNotFoundException{
-		if(args.length != 1) {
-			System.out.println("Please provide server name as argument");
+		if(args.length == 0) {
+			System.out.println("Please provide all servernames/serverIPs as arguments");
 			return;
 		}
 		
-		String serverName = args[0];
+		int totalServers = args.length;
+		
+		/*Choose random server*/
+		Random r = new Random();
+		int chosenIndex = r.nextInt(totalServers);
+		String serverName = args[chosenIndex];
+		System.out.println("Server Chosen: " + serverName);
+		
 		RPCClient client = new RPCClient();
-				
+	
 		client.start(serverName);
 	}
 	

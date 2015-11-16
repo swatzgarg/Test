@@ -1,8 +1,8 @@
-Compile the Server , Client and KVStore  ##This will create jar of client and server separately
+Compile the Server , Client and KVStore  ##Run all commands from the directory RPCProject
 > make --directory=src
 
-To run client from src folder
-> java -cp bin/RPCClient.jar RPCClient <ServerIPaddress>
+To run client
+> java -cp bin/RPCClient.jar RPCClient <ServerIPaddresses>
 
-To run server from src folder
-> java -cp bin/RPCServer.jar -Djava.rmi.server.hostname=<ServerIPaddress> RPCServer 9999
+To run server
+> java -cp <PathTO.jar>/RPCServer.jar -Djava.rmi.server.hostname=<ServerIPaddress> RPCServer 9999
