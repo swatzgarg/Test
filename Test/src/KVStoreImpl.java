@@ -1,20 +1,24 @@
 import java.io.IOException;
 import java.rmi.NotBoundException;
-import java.util.concurrent.ConcurrentHashMap;
 
 /*
  * Simple in-memory Key Value store
  * The functions are synchronized to enable multithreaded access.
  */
 public class KVStoreImpl implements KVStore{
-	ConcurrentHashMap<String, String> data = new ConcurrentHashMap<String, String>();
+	TwoPhaseCommitImpl twophimp;
+	
+	//ConcurrentHashMap<String, String> data = new ConcurrentHashMap<String, String>();
+	public KVStoreImpl(TwoPhaseCommitImpl peer){
+		twophimp = peer;
+	}
 	
 	@Override
 	public void put(String key, String value) throws SecurityException {
-		ServerToServer stos = new ServerToServer("put",key,value);
 	
 		try{
-			stos.sendToPeers();
+			twophimp.sendToPeers("put",key,value);
+			
 		}catch(KeyNotFoundException e){
 			
 		}catch(NotBoundException e){
@@ -23,17 +27,15 @@ public class KVStoreImpl implements KVStore{
 			
 		}
 		
-		data.put(key, value);
+		//data.put(key, value);
 	}
 
 	@Override
-	public synchronized void delete(String key) throws KeyNotFoundException {
-		if(data.containsKey(key)){
-			
-			ServerToServer stos = new ServerToServer("remove",key);
+	public void delete(String key) throws KeyNotFoundException {
 			
 			try{
-				stos.sendToPeers();
+				twophimp.sendToPeers("remove",key,null);
+				
 			}catch(KeyNotFoundException e){
 				
 			}catch(NotBoundException e){
@@ -41,36 +43,12 @@ public class KVStoreImpl implements KVStore{
 			}catch(IOException e){
 				
 			}
-			data.remove(key);
-		} else {
-			throw new KeyNotFoundException();
-		}				
+			//data.remove(key);
+						
 	}
 
-	@Override
-	public synchronized String get(String key) throws KeyNotFoundException {
-		if(data.containsKey(key)){
-			return data.get(key);
-		} else {
-			throw new KeyNotFoundException();
-		}
-	}
-	
-	public void abort(){
-		
-	}
-	
-	public void go(String instruction,String key,String value){
-		if(instruction.equals("put")){
-			data.put(key,value);
-		}
-		else{
-			data.remove(key);
-		}
-	}
-	
-	public String receiveVoteRequest(){
-		return "yes";
+	public String get(String key) throws KeyNotFoundException {
+		return twophimp.get(key);
 	}
 
 }

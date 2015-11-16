@@ -25,12 +25,13 @@ public class RPCServer {
 	 * @throws FileNotFoundException 
 	 */
 	public void start(int port) throws RemoteException, MalformedURLException, AlreadyBoundException, FileNotFoundException {
-		// set the log file to log the calls made to the RPC server
-		FileOutputStream logFile = new FileOutputStream(logFileName);
-		RemoteServer.setLog(logFile);
-
-		KVStore store = new KVStoreImpl();									  // Creates object of type KVStore
+		
+		TwoPhaseCommitImpl peer = new TwoPhaseCommitImpl();
+		TwoPhaseCommit stub1 = (TwoPhaseCommit) UnicastRemoteObject.exportObject(peer,port);
+		
+		KVStore store = new KVStoreImpl(peer);									  // Creates object of type KVStore
 		KVStore stub = (KVStore) UnicastRemoteObject.exportObject(store,port);// Creates stub of type KVStore and exports it on specified port
+		
 		Registry registry;
 		try {
 			// create registry
@@ -39,7 +40,13 @@ public class RPCServer {
 			// if one already exist, get it
 			registry = LocateRegistry.getRegistry(1099);
 		}
-		registry.rebind(KVStore.nameRes, stub);	
+		registry.rebind(KVStore.nameRes, stub);
+		registry.rebind(TwoPhaseCommit.nameRes,stub1);
+		
+		// set the log file to log the calls made to the RPC server
+		FileOutputStream logFile = new FileOutputStream(logFileName);
+		RemoteServer.setLog(logFile);
+		
 	}
 	
 	public static void main(String args[]) throws AlreadyBoundException, RemoteException, MalformedURLException, FileNotFoundException{
