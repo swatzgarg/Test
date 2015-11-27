@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 public class RPCClient {
-
 	{
 		// set up the formatter for logging
 		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tc %4$s: %5$s%6$s%n");
@@ -102,7 +101,7 @@ public class RPCClient {
 		Registry registry = LocateRegistry.getRegistry(hostname);
 		store = (KVStore) registry.lookup(KVStore.nameRes);
 		
-		//prePopulateValues();
+		prePopulateValues();
 	
 		log = Logger.getLogger("client");
 		log.setUseParentHandlers(false);		

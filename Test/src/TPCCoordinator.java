@@ -1,47 +1,61 @@
-import java.io.IOException;
+import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-
 public class TPCCoordinator {
-	String s01 = "52.23.244.58";
-	String s02 = "54.173.32.101";
-	int numberOfServers = 2;
-	TwoPhaseCommit[] peerObjects;
-	String[] hostnames;
+	private TwoPhaseCommit[] peerObjects;
+	private String[] hostnames;
 	
-	public void sendVoteRequest(String instruction,String key,String value) throws RemoteException, KeyNotFoundException{
-		
-		for(int i = 0; i < numberOfServers; i++){
-			//System.out.println(peerObjects[i] + ":" + i);
-			String response = peerObjects[i].receiveVoteRequest();
-			
-			if(response.equals("yes")){
-				peerObjects[i].go(instruction,key,value);
-				//go(instruction,key,value);
+	public TPCCoordinator(String[] servers) {
+		this.hostnames = servers;
+		peerObjects = new TwoPhaseCommit[servers.length];
+	}
+	
+	public void commit(String instruction,String key,String value) throws NotBoundException, AccessException, RemoteException {
+		for (int i = 0; i < hostnames.length; i++) {
+			Registry registry = LocateRegistry.getRegistry(hostnames[i]);
+			peerObjects[i] = (TwoPhaseCommit) registry.lookup(TwoPhaseCommit.nameRes);
 			}
-			else{
-				peerObjects[i].abort();
-				//abort();
+	
+		System.out.println("Starting voting");
+		boolean fVoted = true;
+		for (int i = 0; i < hostnames.length; i++) {
+			try {
+				ResponseTPC response = peerObjects[i].vote(instruction, key, value) ;
+				if(response != ResponseTPC.ACK) {
+					System.out.println(hostnames[i] + " returned reponse " + response );
+					fVoted = false;
+				}
+			} catch (RemoteException e) {
+				System.out.println("Exception while voting by " + hostnames[i]);
+				fVoted = false;
 			}
 		}
+		System.out.println("Ending  voting with result = " + fVoted);
 
+		boolean fCommitted = true;
+		if (fVoted) {
+			System.out.println("Starting commiting.");
+			for (int i = 0; i < hostnames.length; i++) {
+				try {
+					peerObjects[i].commit(instruction, key, value);
+				} catch (RollbackException | RemoteException e) {
+					fCommitted = false;
+				}
+			}
+			System.out.println("Ending  commiting with result = " + fCommitted);	
+		}
+		if (!fVoted || !fCommitted) {
+			System.out.println("Aborting the commit");
+			for (int i = 0; i < hostnames.length; i++) {
+				try {
+					peerObjects[i].abort();
+				} catch (RemoteException e) {
+				}
+			}
+		}
 	} 
 
-	public void sendToPeers(String instruction,String key,String value) throws SecurityException, NotBoundException, IOException, KeyNotFoundException{
-		
-		hostnames = new String[numberOfServers];
-		hostnames[0] = "52.23.244.58";
-		hostnames[1] = "54.173.32.101";
-		
-		peerObjects = new TwoPhaseCommit[numberOfServers];
-		for(int i = 0; i < numberOfServers; i++){
-			Registry registry = LocateRegistry.getRegistry(hostnames[i]);
-			//System.out.println(hostnames[i] + " " + registry.list());
-			peerObjects[i] = (TwoPhaseCommit) registry.lookup(TwoPhaseCommit.nameRes);
-		}
-		sendVoteRequest(instruction,key,value);
-	}
 }

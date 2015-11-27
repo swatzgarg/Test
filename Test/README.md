@@ -5,4 +5,4 @@ To run client
 > java -cp bin/RPCClient.jar RPCClient <ServerIPaddresses>
 
 To run server
-> java -cp <PathTO.jar>/RPCServer.jar -Djava.rmi.server.hostname=<ServerIPaddress> RPCServer 9999
+> java -cp <PathTO.jar>/RPCServer.jar -Djava.rmi.server.hostname=<ServerIPaddress> RPCServer <ServerIPaddresses>

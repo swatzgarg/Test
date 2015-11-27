@@ -1,40 +1,43 @@
-import java.util.concurrent.ConcurrentHashMap;
-
+import java.rmi.RemoteException;
 
 public class TwoPhaseCommitImpl implements TwoPhaseCommit{
+
+	private DataStore data;
 	
-	ConcurrentHashMap<String, String> data = new ConcurrentHashMap<String, String>();
-	
-	public synchronized String get(String key) throws KeyNotFoundException {
-		if(data.containsKey(key)){
-			return data.get(key);
-		} else {
-			throw new KeyNotFoundException();
+	public TwoPhaseCommitImpl(DataStore data) {
+		this.data = data;
+	}
+
+	@Override
+	public ResponseTPC vote(String instruction, String key, String value) throws RemoteException {
+		data.startTwoPhaseCommit();
+		if (instruction.equals("put"))
+			return ResponseTPC.ACK;
+		if(data.containsKey(key)) {
+			return ResponseTPC.ACK;
 		}
+		data.endTwoPhaseCommit();
+		return ResponseTPC.NotReady;
 	}
-	
-	public void abort(){
-		
-	}
-	
-	public synchronized void go(String instruction,String key,String value) throws KeyNotFoundException{
+
+	@Override
+	public void commit(String instruction,String key,String value) throws RemoteException, RollbackException {
 		if(instruction.equals("put")){
-			//System.out.println("put(" + key + "," + value + ")");
 			data.put(key,value);
 		}
 		else{
-			//System.out.println("delete(" + key + ")");
 			if(data.containsKey(key)){
 				data.remove(key);
 			} else {
-				throw new KeyNotFoundException();
-			}
-			
+				throw new RollbackException();
+			}			
 		}
+		data.endTwoPhaseCommit();
 	}
 	
-	public String receiveVoteRequest(){
-		return "yes";
+	@Override
+	public void abort() throws RemoteException {
+		data.endTwoPhaseCommit();
 	}
 	
 	

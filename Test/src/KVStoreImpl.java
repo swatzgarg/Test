@@ -1,43 +1,50 @@
+import java.rmi.AccessException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 
 /*
  * Simple in-memory Key Value store
  * The functions are synchronized to enable multithreaded access.
  */
 public class KVStoreImpl implements KVStore{
-	TwoPhaseCommitImpl twophimp;
-	TPCCoordinator coordinator;
+	
+	private TPCCoordinator twoPhaseCommit;
+	private DataStore data;
 
-	public KVStoreImpl(TPCCoordinator coordinator,TwoPhaseCommitImpl peer){
-		this.coordinator = coordinator;
-		twophimp = peer;
+	public KVStoreImpl(TPCCoordinator peerCordinator, DataStore data ){
+		this.twoPhaseCommit = peerCordinator;
+		this.data = data;
 	}
 
 	@Override
-	public void put(String key, String value) {
-
-		try{
-			coordinator.sendToPeers("put",key,value);
-		}catch(Exception e){
-
+	public void put(String key, String value) throws RemoteException {
+		try {
+			twoPhaseCommit.commit("put", key, value);
 		}
-
+		catch (AccessException | NotBoundException e) {
+			throw new RemoteException("Two Phase Commit error", e);
+		}
 	}
 
 	@Override
-	public void delete(String key) throws KeyNotFoundException {
-
-		try{
-			coordinator.sendToPeers("remove",key,null);
-
-		}catch(KeyNotFoundException e){
-			throw e;
-		}catch(Exception e){
-
-		}			
+	public void delete(String key) throws KeyNotFoundException, RemoteException {
+		if(!data.containsKey(key)) 
+			throw new KeyNotFoundException();
+		try {
+			twoPhaseCommit.commit("remove", key, null);
+		}
+		catch (AccessException | NotBoundException e) {
+			throw new RemoteException("Two Phase Commit error", e);
+		}
 	}
 
-	public String get(String key) throws KeyNotFoundException {
-		return twophimp.get(key);
-	}
-
+	@Override
+	public synchronized String get(String key) throws KeyNotFoundException {
+		if(data.containsKey(key)){
+			String value = data.get(key);
+			return value;
+		} else {
+			throw new KeyNotFoundException();
+		}
+	}	
 }
