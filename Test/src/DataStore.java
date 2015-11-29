@@ -1,17 +1,23 @@
 import java.util.concurrent.ConcurrentHashMap;
-
+/*
+ * Backend database for the Key-Value Store.
+ * It implements locking for the two phase commit.
+ */
 public class DataStore {
 
 	private ConcurrentHashMap<String, String> data = new ConcurrentHashMap<String, String>();
 	private boolean fInTwoPhaseCommit = false;
 	private long lockStartTime;
-	//private long lockCurrentTime;
 	
 	public DataStore(){
 		LockManager lockManager = new LockManager();
 		lockManager.start();
 	}
 	
+	/*
+	 * This class runs a background thread which prevents the peer from hanging in case 
+	 * the coordinator didn't send the commit or abort message.
+	 */
 	public class LockManager extends Thread {
 		public void run(){
 			while(true){
@@ -40,12 +46,12 @@ public class DataStore {
 		return data.containsKey(key);
 	}
 	
-	public void put(String key, String value) {
-		data.put(key, value);
+	public String put(String key, String value) {
+		return data.put(key, value);
 	}
 	
-	public void remove(String key) {
-		data.remove(key);
+	public String remove(String key) {
+		return data.remove(key);
 	}
 	
 	public String get(String key) {

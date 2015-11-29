@@ -1,6 +1,9 @@
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+/*
+ * Interface to support two phase commit protocol
+ */
 public interface TwoPhaseCommit extends Remote {
 	public static final String nameRes = "ReplicaServer";
 	

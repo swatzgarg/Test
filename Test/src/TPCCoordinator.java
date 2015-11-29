@@ -4,6 +4,9 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
+/*
+ * This class handles the Two Phase commit protocol as a coordinator.
+ */
 public class TPCCoordinator {
 	private TwoPhaseCommit[] peerObjects;
 	private String[] hostnames;
@@ -14,13 +17,15 @@ public class TPCCoordinator {
 	}
 	
 	public void commit(String instruction,String key,String value) throws NotBoundException, AccessException, RemoteException {
+		// get peers
 		for (int i = 0; i < hostnames.length; i++) {
 			Registry registry = LocateRegistry.getRegistry(hostnames[i]);
 			peerObjects[i] = (TwoPhaseCommit) registry.lookup(TwoPhaseCommit.nameRes);
 			}
 	
+		// voting phase
 		System.out.println("Starting voting");
-		boolean fVoted = true;
+		boolean fVoted = true; // true means that all peers as yet agree.
 		for (int i = 0; i < hostnames.length; i++) {
 			try {
 				ResponseTPC response = peerObjects[i].vote(instruction, key, value) ;
@@ -35,19 +40,21 @@ public class TPCCoordinator {
 		}
 		System.out.println("Ending  voting with result = " + fVoted);
 
-		boolean fCommitted = true;
+		// commit phase
 		if (fVoted) {
 			System.out.println("Starting commiting.");
 			for (int i = 0; i < hostnames.length; i++) {
 				try {
 					peerObjects[i].commit(instruction, key, value);
 				} catch (RollbackException | RemoteException e) {
-					fCommitted = false;
+					// two phase commit protocol assumes that the commit phase will always succeed.
+					// otherwise sending an abort message will cause the peers to rollback their transaction
 				}
 			}
-			System.out.println("Ending  commiting with result = " + fCommitted);	
 		}
-		if (!fVoted || !fCommitted) {
+		
+		// abort phase.
+		if (!fVoted) {
 			System.out.println("Aborting the commit");
 			for (int i = 0; i < hostnames.length; i++) {
 				try {
