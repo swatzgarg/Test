@@ -14,6 +14,7 @@ public class RPCServer {
 	{
 		// enable server side transport level logging. Does not output to screen (false)
 		System.setProperty("java.rmi.server.logCalls","false");
+		System.setProperty("sun.rmi.transport.tcp.responseTimeout", "5000");
 	}
 	
 	
