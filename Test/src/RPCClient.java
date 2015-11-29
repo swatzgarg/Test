@@ -16,9 +16,11 @@ public class RPCClient {
 		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tc %4$s: %5$s%6$s%n");
 	}
 	
-	private KVStore store;
 	private final String logFileName="client.log";
 	private Logger log;
+	private KVStore[] serverObjects;
+	private String[] hostnames;
+	
 		
 	/*
 	 * A simple console UI
@@ -29,8 +31,11 @@ public class RPCClient {
 		String instruction;
 		String key;
 		String value;
+		int chosenIndex;
 		
 		while(true){
+			chosenIndex = chooseRandomServer();
+			System.out.println("\nChosen Server: " + hostnames[chosenIndex]);
 			
 			System.out.println("Please enter the instruction to be executed on the KVStore. Type exit to quit client: ");
 			instruction = reader.nextLine();
@@ -41,7 +46,7 @@ public class RPCClient {
 				System.out.println("Please enter the value ");
 				value = reader.nextLine();
 				try {
-					store.put(key,value);
+					serverObjects[chosenIndex].put(key,value);
 				}
 				catch(RemoteException e) {
 					System.out.println("Error happened");
@@ -52,7 +57,7 @@ public class RPCClient {
 				System.out.println("Please enter the key ");
 				key = reader.nextLine();
 				try {
-					ans = store.get(key);
+					ans = serverObjects[chosenIndex].get(key);
 					System.out.println("Returned: " + ans);
 				}
 				catch (KeyNotFoundException e) {
@@ -68,7 +73,7 @@ public class RPCClient {
 				System.out.println("Please enter the key ");
 				key = reader.nextLine();
 				try {
-					store.delete(key);
+					serverObjects[chosenIndex].delete(key);
 				}
 				catch (KeyNotFoundException e) {
 					System.out.println("Key not found");
@@ -86,6 +91,7 @@ public class RPCClient {
 			else{
 				System.out.println("Incorrect instruction. Please enter PUT, GET, DELETE or EXIT");
 			}
+			
 		}
 	}
 	
@@ -97,12 +103,18 @@ public class RPCClient {
 	 * @throws SecurityException 
 	 * @throws KeyNotFoundException 
 	 */
-	public void start(String hostname) throws NotBoundException, SecurityException, IOException, KeyNotFoundException {		
-		Registry registry = LocateRegistry.getRegistry(hostname);
-		store = (KVStore) registry.lookup(KVStore.nameRes);
+	public void start(String[] hostnames) throws NotBoundException, SecurityException, IOException, KeyNotFoundException {
+		//Get all Server stubs
+		this.hostnames = hostnames; 
+		serverObjects = new KVStore[hostnames.length];
+		for(int i = 0; i < hostnames.length;i++){
+			Registry registry = LocateRegistry.getRegistry(hostnames[i]);
+			serverObjects[i] = (KVStore) registry.lookup(KVStore.nameRes);
+		}
 		
 		prePopulateValues();
-	
+		
+		//Set up Logging
 		log = Logger.getLogger("client");
 		log.setUseParentHandlers(false);		
 		FileHandler handler = new FileHandler(logFileName, true); //append to log
@@ -117,45 +129,45 @@ public class RPCClient {
 	 * Prepopulate some data in the server. Also run some sample commands.
 	 */
 	private void prePopulateValues() throws RemoteException, KeyNotFoundException {
-		store.put("Key1", "value1");
-		store.put("Key2", "value2");
-		store.put("Key3", "value3");
-		store.put("Key4", "value4");
-		store.put("Key5", "value5");
-		store.get("Key1");
-		store.get("Key2");
-		store.get("Key3");
-		store.get("Key4");
-		store.get("Key5");
-		store.delete("Key1");
-		store.put("Key1", "Value1");
-		store.delete("Key2");
-		store.put("Key2", "Value2");
-		store.delete("Key3");
-		store.put("Key3", "Value3");
-		store.delete("Key4");
-		store.put("Key4", "Value4");
-		store.delete("Key5");
-		store.put("Key5", "Value5");
+		System.out.println("Performing 10 puts,5 gets,5 deletes...");
+		
+		serverObjects[chooseRandomServer()].put("Key1", "value1");
+		serverObjects[chooseRandomServer()].put("Key2", "value2");
+		serverObjects[chooseRandomServer()].put("Key3", "value3");
+		serverObjects[chooseRandomServer()].put("Key4", "value4");
+		serverObjects[chooseRandomServer()].put("Key5", "value5");
+		serverObjects[chooseRandomServer()].get("Key1");
+		serverObjects[chooseRandomServer()].get("Key2");
+		serverObjects[chooseRandomServer()].get("Key3");
+		serverObjects[chooseRandomServer()].get("Key4");
+		serverObjects[chooseRandomServer()].get("Key5");
+		serverObjects[chooseRandomServer()].delete("Key1");
+		serverObjects[chooseRandomServer()].put("Key1", "Value1");
+		serverObjects[chooseRandomServer()].delete("Key2");
+		serverObjects[chooseRandomServer()].put("Key2", "Value2");
+		serverObjects[chooseRandomServer()].delete("Key3");
+		serverObjects[chooseRandomServer()].put("Key3", "Value3");
+		serverObjects[chooseRandomServer()].delete("Key4");
+		serverObjects[chooseRandomServer()].put("Key4", "Value4");
+		serverObjects[chooseRandomServer()].delete("Key5");
+		serverObjects[chooseRandomServer()].put("Key5", "Value5");
 	}
+	
+	public int chooseRandomServer(){
+		Random r = new Random();
+		int chosenIndex = r.nextInt(serverObjects.length);
+		return chosenIndex;
+	} 
 
 	public static void main(String args[]) throws NotBoundException, SecurityException, IOException, KeyNotFoundException{
 		if(args.length == 0) {
 			System.out.println("Please provide all servernames/serverIPs as arguments");
 			return;
 		}
-		
-		int totalServers = args.length;
-		
-		/*Choose random server*/
-		Random r = new Random();
-		int chosenIndex = r.nextInt(totalServers);
-		String serverName = args[chosenIndex];
-		System.out.println("Server Chosen: " + serverName);
-		
+
 		RPCClient client = new RPCClient();
-	
-		client.start(serverName);
+
+		client.start(args);
 	}
 	
 }

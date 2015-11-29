@@ -55,7 +55,7 @@ public class RPCServer {
 	}
 	
 	public static void main(String args[]) throws AlreadyBoundException, RemoteException, MalformedURLException, FileNotFoundException{
-		if(args.length < 1){
+		if(args.length < 2){
 			System.out.println("Please provide server port number and server hostnames as arguments");
 			return;
 		}

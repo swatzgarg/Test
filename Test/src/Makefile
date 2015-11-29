@@ -2,10 +2,10 @@ all: client server jar
 
 client: RPCClient.class KVStore.class KeyNotFoundException.class
 
-server: RPCServer.class KVStore.class KVStoreImpl.class TwoPhaseCommit.class TwoPhaseCommitImpl.class TPCCoordinator.class KeyNotFoundException.class
+server: RPCServer.class KVStore.class KVStoreImpl.class TwoPhaseCommit.class TwoPhaseCommitImpl.class TPCCoordinator.class KeyNotFoundException.class DataStore.class ResponseTPC.class RollbackException.class 
 
 jar: client server
-	cd ../bin; jar cf RPCServer.jar RPCServer.class KVStore.class KVStoreImpl.class TwoPhaseCommit.class TwoPhaseCommitImpl.class TPCCoordinator.class KeyNotFoundException.class
+	cd ../bin; jar cf RPCServer.jar RPCServer.class KVStore.class KVStoreImpl.class TwoPhaseCommit.class TwoPhaseCommitImpl.class TPCCoordinator.class KeyNotFoundException.class DataStore.class ResponseTPC.class RollbackException.class 
 	cd ../bin; jar cf RPCClient.jar RPCClient.class KVStore.class KeyNotFoundException.class
 
 %.class: %.java
