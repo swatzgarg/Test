@@ -46,12 +46,12 @@ public class DataStore {
 		return data.containsKey(key);
 	}
 	
-	public String put(String key, String value) {
-		return data.put(key, value);
+	public void put(String key, String value) {
+		data.put(key, value);
 	}
 	
-	public String remove(String key) {
-		return data.remove(key);
+	public void remove(String key) {
+		data.remove(key);
 	}
 	
 	public String get(String key) {
